@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Caption Generator</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            max-width: 800px;
+        }
+        .upload-container {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .image-preview {
+            margin-top: 15px;
+            display: none;
+        }
+        .image-preview img {
+            max-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .result { 
+            margin-top: 20px; 
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .filename-display {
+            margin-top: 5px;
+            font-style: italic;
+            color: #666;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>📷 Image Caption Generator</h1>
+    
+    <form method="POST" enctype="multipart/form-data">
+        <div class="upload-container">
+            <label for="image-upload">Upload an Image:</label><br>
+            <input type="file" id="image-upload" name="image" accept="image/*" required title="Upload an image for caption generation" onchange="showFileName(this)">
+            <div class="filename-display" id="filename-display"></div>
+            
+            <!-- This will show the image after selection but before submission -->
+            <div class="image-preview" id="image-preview">
+                <img id="preview-img" src="#" alt="Image preview">
+            </div>
+            
+            <br><br>
+            <button type="submit">Generate Caption</button>
+        </div>
+    </form>
+
+    <!-- Show the uploaded image after form submission -->
+    {% if image_url %}
+        <div class="result">
+            <h3>Uploaded Image:</h3>
+            <img src="{{ image_url }}" alt="Uploaded Image" style="max-width: 500px;">
+        </div>
+    {% endif %}
+    
+    {% if caption %}
+        <div class="result">
+            <h3>Generated Caption:</h3>
+            <h2>"{{ caption }}"</h2>
+        </div>
+    {% endif %}
+
+    <script>
+        // Show filename after selection
+        function showFileName(input) {
+            const fileName = input.files[0]?.name;
+            const filenameDisplay = document.getElementById('filename-display');
+            
+            if (fileName) {
+                filenameDisplay.textContent = 'Selected: ' + fileName;
+                
+                // Show image preview
+                const previewImg = document.getElementById('preview-img');
+                const imagePreview = document.getElementById('image-preview');
+                
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    }
+                    
+                    reader.readAsDataURL(input.files[0]);
+                }
+            } else {
+                filenameDisplay.textContent = '';
+                document.getElementById('image-preview').style.display = 'none';
+            }
+        }
+        
+        // If there's an image URL from the server, show it as uploaded
+        document.addEventListener('DOMContentLoaded', function() {
+    {% if image_url %}
+    (function() {
+        const filenameDisplay = document.getElementById('filename-display');
+        const imageUrl = {{ image_url|tojson|safe }};
+        if (filenameDisplay) {
+            const fileName = imageUrl.split('/').pop();
+            filenameDisplay.textContent = 'Uploaded: ' + fileName;
+        }
+    })();
+    {% endif %}
+});
+    </script>
+</body>
+</html>
